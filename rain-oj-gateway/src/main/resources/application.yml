@@ -1,0 +1,28 @@
+spring:
+  main:
+    web-application-type: reactive
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+        - id: question-service
+          uri: lb://question-service
+          predicates:
+            - Path=/api/question/**
+    nacos:
+      discovery:
+        server-addr: 192.168.126.145:8848
+server:
+  port: 9000
+knife4j:
+  gateway:
+    enabled: true
+    strategy: discover
+    discover:
+      enabled: true
+      version: swagger2

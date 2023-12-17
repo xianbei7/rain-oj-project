@@ -1,0 +1,6 @@
+spring:
+  # todo 上线改地址
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.126.145:8848

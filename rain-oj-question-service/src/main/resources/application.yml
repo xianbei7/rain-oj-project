@@ -1,0 +1,45 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: question-service
+  # 默认 dev 环境
+  profiles:
+    active: dev
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/rain_oj
+    username: root
+    password: 1234
+  # Redis 配置
+  redis:
+    database: 0
+    host: 192.168.126.145
+    port: 6379
+    timeout: 5000
+    password: 1234
+  # todo 上线改地址
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.126.145:8848
+server:
+  address: 0.0.0.0
+  port: 9200
+  servlet:
+    context-path: /api/question
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # 全局逻辑删除的实体字段名
+      logic-delete-value: 1 # 逻辑已删除值（默认为 1）
+      logic-not-delete-value: 0 # 逻辑未删除值（默认为 0）
+knife4j:
+  enable: true
