@@ -1,8 +1,5 @@
 package com.rain.oj.judgeservice.service;
 
-import com.rain.oj.model.entity.QuestionSubmit;
-import com.rain.oj.model.judge.JudgeResult;
-import com.rain.oj.model.judge.codesandbox.ExecuteCodeRequest;
 import com.rain.oj.model.judge.codesandbox.ExecuteCodeResponse;
 
 /**

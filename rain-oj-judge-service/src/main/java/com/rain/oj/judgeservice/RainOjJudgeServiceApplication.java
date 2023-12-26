@@ -16,7 +16,6 @@ import org.springframework.context.annotation.ComponentScan;
 public class RainOjJudgeServiceApplication {
 
     public static void main(String[] args) {
-        IntRabbitMq.doInit();
         SpringApplication.run(RainOjJudgeServiceApplication.class, args);
     }
 

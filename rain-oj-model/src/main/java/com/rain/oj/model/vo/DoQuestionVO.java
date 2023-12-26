@@ -3,7 +3,7 @@ package com.rain.oj.model.vo;
 import cn.hutool.json.JSONUtil;
 import com.rain.oj.model.dto.question.JudgeConfig;
 import com.rain.oj.model.entity.Question;
-import com.rain.oj.model.enums.QuestionTypeEnum;
+import com.rain.oj.model.enums.QuestionModeEnum;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
@@ -29,7 +29,7 @@ public class DoQuestionVO implements Serializable {
     /**
      * 类型
      */
-    private String type;
+    private String mode;
 
     /**
      * 内容
@@ -103,8 +103,8 @@ public class DoQuestionVO implements Serializable {
         }
         DoQuestionVO questionVO = new DoQuestionVO();
         BeanUtils.copyProperties(question, questionVO);
-        Integer questionType = question.getType();
-        questionVO.setType(QuestionTypeEnum.getEnumByValue(questionType).getType());
+        Integer questionType = question.getMode();
+        questionVO.setMode(QuestionModeEnum.getEnumByValue(questionType).getMode());
         List<String> tagList = JSONUtil.toList(question.getTags(), String.class);
         questionVO.setTags(tagList);
         String judgeConfig = question.getJudgeConfig();

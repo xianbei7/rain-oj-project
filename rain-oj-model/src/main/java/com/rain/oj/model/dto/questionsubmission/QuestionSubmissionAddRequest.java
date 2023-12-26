@@ -1,4 +1,4 @@
-package com.rain.oj.model.dto.questionsubmit;
+package com.rain.oj.model.dto.questionsubmission;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import java.io.Serializable;
  * 题目提交请求
  */
 @Data
-public class QuestionSubmitAddRequest implements Serializable {
+public class QuestionSubmissionAddRequest implements Serializable {
 
     /**
      * 题目 id

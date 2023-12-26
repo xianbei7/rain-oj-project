@@ -45,9 +45,9 @@ public class Question implements Serializable {
     private Integer difficulty;
 
     /**
-     * 类型
+     * 题目模式（ACM、核心代码、SQL）
      */
-    private Integer type;
+    private Integer mode;
 
     /**
      * 题目答案

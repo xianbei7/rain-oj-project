@@ -10,9 +10,9 @@ import com.rain.oj.judgeservice.strategy.JudgeManager;
 import com.rain.oj.judgeservice.service.JudgeService;
 import com.rain.oj.model.dto.question.JudgeCase;
 import com.rain.oj.model.entity.Question;
-import com.rain.oj.model.entity.QuestionSubmit;
+import com.rain.oj.model.entity.QuestionSubmission;
 import com.rain.oj.model.enums.JudgeResultEnum;
-import com.rain.oj.model.enums.QuestionSubmitStatusEnum;
+import com.rain.oj.model.enums.QuestionSubmissionStatusEnum;
 import com.rain.oj.model.judge.JudgeInfo;
 import com.rain.oj.model.judge.JudgeResult;
 import com.rain.oj.model.judge.codesandbox.ExecuteCodeRequest;
@@ -52,28 +52,28 @@ public class JudgeServiceImpl implements JudgeService {
     @Override
     public Boolean doJudge(Long questionSubmitId) {
 
-        QuestionSubmit questionSubmit = questionFeignClient.getQuestionSubmitById(questionSubmitId);
-        if (questionSubmit == null) {
+        QuestionSubmission questionSubmission = questionFeignClient.getQuestionSubmitById(questionSubmitId);
+        if (questionSubmission == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "提交信息不存在");
         }
-        Long questionId = questionSubmit.getQuestionId();
+        Long questionId = questionSubmission.getQuestionId();
         Question question = questionFeignClient.getQuestionById(questionId);
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "题目不存在");
         }
-        if (!questionSubmit.getStatus().equals(QuestionSubmitStatusEnum.WAITING.getValue())) {
+        if (!questionSubmission.getStatus().equals(QuestionSubmissionStatusEnum.WAITING.getStatus())) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "题目正在判题");
         }
         // todo 可扩展：分布式锁
-        QuestionSubmit questionSubmitUpdate = new QuestionSubmit();
-        questionSubmitUpdate.setId(questionSubmitId);
-        questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.RUNNING.getValue());
-        boolean update = questionFeignClient.updateQuestionSubmitById(questionSubmitUpdate).getData();
+        QuestionSubmission questionSubmissionUpdate = new QuestionSubmission();
+        questionSubmissionUpdate.setId(questionSubmitId);
+        questionSubmissionUpdate.setStatus(QuestionSubmissionStatusEnum.RUNNING.getStatus());
+        boolean update = questionFeignClient.updateQuestionSubmitById(questionSubmissionUpdate).getData();
         if (!update) {
             throw new BusinessException(ErrorCode.OPERATION_ERROR, "题目状态更新失败");
         }
-        String language = questionSubmit.getLanguage();
-        String code = questionSubmit.getCode();
+        String language = questionSubmission.getLanguage();
+        String code = questionSubmission.getCode();
         String judgeCaseStr = question.getJudgeCase();
         List<JudgeCase> judgeCaseList = JSONUtil.toList(judgeCaseStr, JudgeCase.class);
         List<String> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
@@ -118,17 +118,17 @@ public class JudgeServiceImpl implements JudgeService {
         Boolean isAllSuccess = executeCodeResponse.getIsAllSuccess();
         List<JudgeInfo> judgeInfoList = executeCodeResponse.getJudgeInfoList();
 
-        QuestionSubmit questionSubmit = new QuestionSubmit();
+        QuestionSubmission questionSubmission = new QuestionSubmission();
         // 根据题目的判题结果，设置题目的状态
-        Integer status = isAllSuccess && judgeResult.getCorrectRate().equals(100) ? QuestionSubmitStatusEnum.ACCEPTED.getValue() : QuestionSubmitStatusEnum.FAIL.getValue();
-        questionSubmit.setStatus(status);
+        String status = isAllSuccess && judgeResult.getCorrectRate().equals(100) ? QuestionSubmissionStatusEnum.ACCEPTED.getStatus() : QuestionSubmissionStatusEnum.FAIL.getStatus();
+        questionSubmission.setStatus(status);
 
         // 修改数据库中的判题结果
-        questionSubmit.setId(judgeContext.getQuestionSubmitId());
+        questionSubmission.setId(judgeContext.getQuestionSubmitId());
         String jsonStr = JSONUtil.toJsonStr(judgeResult);
-        questionSubmit.setJudgeResult(jsonStr);
-        questionSubmit.setJudgeInfo(JSONUtil.toJsonStr(judgeInfoList));
-        return questionFeignClient.updateQuestionSubmitById(questionSubmit).getData();
+        questionSubmission.setJudgeResult(jsonStr);
+        questionSubmission.setJudgeInfo(JSONUtil.toJsonStr(judgeInfoList));
+        return questionFeignClient.updateQuestionSubmitById(questionSubmission).getData();
     }
 
     /**
@@ -140,17 +140,17 @@ public class JudgeServiceImpl implements JudgeService {
     public void setJudgeFail(String executeId) {
         String judgeContextJson = stringRedisTemplate.opsForValue().get(JudgeConstant.JUDGE_CONTEXT_KEY + executeId);
         JudgeContext judgeContext = JSONUtil.toBean(judgeContextJson, JudgeContext.class);
-        QuestionSubmit questionSubmit = new QuestionSubmit();
-        questionSubmit.setId(judgeContext.getQuestionSubmitId());
+        QuestionSubmission questionSubmission = new QuestionSubmission();
+        questionSubmission.setId(judgeContext.getQuestionSubmitId());
         // 根据题目的判题结果，设置题目的状态
-        questionSubmit.setStatus(QuestionSubmitStatusEnum.FAIL.getValue());
+        questionSubmission.setStatus(QuestionSubmissionStatusEnum.FAIL.getStatus());
         // 修改数据库中的判题结果
         JudgeResult judgeResult = new JudgeResult();
         judgeResult.setType(JudgeResultEnum.JUDGE_FAIL.getType());
         judgeResult.setMessage("系统繁忙！请稍后再试吧");
         judgeResult.setCorrectRate(0);
         String judgeResultJson = JSONUtil.toJsonStr(judgeResult);
-        questionSubmit.setJudgeResult(judgeResultJson);
-        questionFeignClient.updateQuestionSubmitById(questionSubmit);
+        questionSubmission.setJudgeResult(judgeResultJson);
+        questionFeignClient.updateQuestionSubmitById(questionSubmission);
     }
 }

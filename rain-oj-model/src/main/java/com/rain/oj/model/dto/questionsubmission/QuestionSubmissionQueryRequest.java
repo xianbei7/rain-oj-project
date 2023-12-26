@@ -1,4 +1,4 @@
-package com.rain.oj.model.dto.questionsubmit;
+package com.rain.oj.model.dto.questionsubmission;
 
 import com.rain.oj.common.PageRequest;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class QuestionSubmitQueryRequest extends PageRequest implements Serializable {
+public class QuestionSubmissionQueryRequest extends PageRequest implements Serializable {
 
     /**
      * 题目难度

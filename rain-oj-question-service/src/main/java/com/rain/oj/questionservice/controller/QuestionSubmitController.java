@@ -5,17 +5,18 @@ import com.rain.oj.common.BaseResponse;
 import com.rain.oj.common.ErrorCode;
 import com.rain.oj.common.ResultUtils;
 import com.rain.oj.common.exception.BusinessException;
-import com.rain.oj.model.dto.questionsubmit.QuestionSubmitAddRequest;
-import com.rain.oj.model.dto.questionsubmit.QuestionSubmitQueryRequest;
-import com.rain.oj.model.dto.questionsubmit.UserQuestionSubmitQueryRequest;
-import com.rain.oj.model.entity.QuestionSubmit;
+import com.rain.oj.model.dto.questionsubmission.QuestionSubmissionAddRequest;
+import com.rain.oj.model.dto.questionsubmission.QuestionSubmissionQueryRequest;
+import com.rain.oj.model.dto.questionsubmission.UserQuestionSubmissionQueryRequest;
+import com.rain.oj.model.entity.QuestionSubmission;
 import com.rain.oj.model.entity.User;
 import com.rain.oj.model.enums.ProgrammingLanguageEnum;
-import com.rain.oj.model.vo.DetailedQuestionSubmitVO;
+import com.rain.oj.model.vo.DetailedQuestionSubmissionVO;
 import com.rain.oj.feignclient.service.UserFeignClient;
-import com.rain.oj.model.vo.QuestionSubmitVO;
-import com.rain.oj.model.vo.ViewQuestionSubmitVO;
+import com.rain.oj.model.vo.QuestionSubmissionVO;
+import com.rain.oj.model.vo.ViewQuestionSubmissionVO;
 import com.rain.oj.questionservice.service.QuestionSubmitService;
+import com.rain.oj.questionservice.util.UserSubmitRateLimiter;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -36,38 +37,47 @@ public class QuestionSubmitController {
     @Resource
     private UserFeignClient userFeignClient;
 
+    @Resource
+    private UserSubmitRateLimiter userSubmitRateLimiter;
+
     /**
      * 提交题目
      *
-     * @param questionSubmitAddRequest 题目提交请求
+     * @param questionSubmissionAddRequest 题目提交请求
      * @param request                  http请求
      * @return {@link Long} 题目提交id
      */
     @PostMapping("/")
-    public BaseResponse<Long> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest,
-                                               HttpServletRequest request) {
-        if (questionSubmitAddRequest == null || questionSubmitAddRequest.getQuestionId() <= 0) {
+    public BaseResponse<Boolean> doQuestionSubmit(@RequestBody QuestionSubmissionAddRequest questionSubmissionAddRequest,
+                                                  HttpServletRequest request) {
+        if (questionSubmissionAddRequest == null || questionSubmissionAddRequest.getQuestionId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 登录才能操作
         final User loginUser = userFeignClient.getLoginUser(request);
-        long result = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
-        return ResultUtils.success(result);
+        Long userId = loginUser.getId();
+        boolean allowSubmit = userSubmitRateLimiter.limitUserSubmit(userId);
+        if (allowSubmit) {
+            Boolean result = questionSubmitService.doQuestionSubmit(questionSubmissionAddRequest, userId);
+            return ResultUtils.success(result);
+        } else {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "操作过于频繁！请稍后再试");
+        }
     }
 
     /**
      * 分页获取题目提交列表（仅管理员和本人能看到答案和提交代码）
      *
-     * @param questionSubmitQueryRequest 题目查询请求
+     * @param questionSubmissionQueryRequest 题目查询请求
      * @param request                    Http请求
-     * @return {@link Page< DetailedQuestionSubmitVO >} 题目提交vo分页
+     * @return {@link Page< DetailedQuestionSubmissionVO >} 题目提交vo分页
      */
     @PostMapping("/list/page")
-    public BaseResponse<Page<DetailedQuestionSubmitVO>> listDetailedQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
-                                                                                         HttpServletRequest request) {
-        long current = questionSubmitQueryRequest.getCurrent();
-        long size = questionSubmitQueryRequest.getPageSize();
-        Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size), questionSubmitService.getDetailedQueryWrapper(questionSubmitQueryRequest));
+    public BaseResponse<Page<DetailedQuestionSubmissionVO>> listDetailedQuestionSubmissionByPage(@RequestBody QuestionSubmissionQueryRequest questionSubmissionQueryRequest,
+                                                                                                 HttpServletRequest request) {
+        long current = questionSubmissionQueryRequest.getCurrent();
+        long size = questionSubmissionQueryRequest.getPageSize();
+        Page<QuestionSubmission> questionSubmitPage = questionSubmitService.page(new Page<>(current, size), questionSubmitService.getDetailedQueryWrapper(questionSubmissionQueryRequest));
         // 判断是否登录
         userFeignClient.getLoginUser(request);
         // 返回脱敏信息
@@ -77,14 +87,14 @@ public class QuestionSubmitController {
     /**
      * 分页获取某个用户题目提交列表
      *
-     * @param userQuestionSubmitQueryRequest 题目查询请求
-     * @return {@link Page< QuestionSubmitVO >} 简单题目提交vo分页
+     * @param userQuestionSubmissionQueryRequest 题目查询请求
+     * @return {@link Page< QuestionSubmissionVO >} 简单题目提交vo分页
      */
     @PostMapping("/list/user/page")
-    public BaseResponse<Page<QuestionSubmitVO>> listUserQuestionSubmitByPage(@RequestBody UserQuestionSubmitQueryRequest userQuestionSubmitQueryRequest) {
-        long current = userQuestionSubmitQueryRequest.getCurrent();
-        long size = userQuestionSubmitQueryRequest.getPageSize();
-        Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size), questionSubmitService.getUserQueryWrapper(userQuestionSubmitQueryRequest.getUserId()));
+    public BaseResponse<Page<QuestionSubmissionVO>> listUserQuestionSubmissionByPage(@RequestBody UserQuestionSubmissionQueryRequest userQuestionSubmissionQueryRequest) {
+        long current = userQuestionSubmissionQueryRequest.getCurrent();
+        long size = userQuestionSubmissionQueryRequest.getPageSize();
+        Page<QuestionSubmission> questionSubmitPage = questionSubmitService.page(new Page<>(current, size), questionSubmitService.getUserQueryWrapper(userQuestionSubmissionQueryRequest.getUserId()));
         // 返回脱敏信息
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage));
     }
@@ -95,10 +105,10 @@ public class QuestionSubmitController {
      * @param questionId 题目id
      * @param userId     用户id（可没有即本人查看）
      * @param request    Http请求
-     * @return {@link List<ViewQuestionSubmitVO>} 题目提交vo列表
+     * @return {@link List< ViewQuestionSubmissionVO >} 题目提交vo列表
      */
     @GetMapping("/my/view/list")
-    public BaseResponse<List<ViewQuestionSubmitVO>> listMyQuestionSubmitById(Long questionId, Long userId, HttpServletRequest request) {
+    public BaseResponse<List<ViewQuestionSubmissionVO>> listMyQuestionSubmissionById(Long questionId, Long userId, HttpServletRequest request) {
         if (questionId == null || questionId < 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "题目不存在");
         }
@@ -108,9 +118,9 @@ public class QuestionSubmitController {
         } else if (!userId.equals(loginUser.getId()) && !userFeignClient.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无查看权限");
         }
-        List<QuestionSubmit> questionSubmitList = questionSubmitService.listMyQuestionSubmitById(questionId, userId);
+        List<QuestionSubmission> questionSubmissionList = questionSubmitService.listMyQuestionSubmitById(questionId, userId);
         // 返回脱敏信息
-        return ResultUtils.success(questionSubmitService.getViewQuestionSubmitVOList(questionSubmitList));
+        return ResultUtils.success(questionSubmitService.getViewQuestionSubmitVOList(questionSubmissionList));
     }
 
     /**
@@ -119,7 +129,7 @@ public class QuestionSubmitController {
      * @return {@link List<String>} 编程语言列表
      */
     @GetMapping("/get/languages")
-    public BaseResponse<List<String>> getQuestionSubmitLanguages() {
+    public BaseResponse<List<String>> getLanguages() {
         return ResultUtils.success(ProgrammingLanguageEnum.getLanguages());
     }
 }

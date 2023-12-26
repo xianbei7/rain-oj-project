@@ -1,6 +1,5 @@
 package com.rain.oj.judgeservice.strategy;
 
-import com.rain.oj.model.entity.QuestionSubmit;
 import com.rain.oj.model.judge.JudgeResult;
 import org.springframework.stereotype.Service;
 
@@ -26,4 +25,3 @@ public class JudgeManager {
     }
 
 }
-

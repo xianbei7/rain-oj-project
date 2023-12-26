@@ -12,9 +12,9 @@ import java.util.Date;
 /**
  * 题目提交实体类
  */
-@TableName(value = "question_submit")
+@TableName(value = "question_submission")
 @Data
-public class QuestionSubmit implements Serializable {
+public class QuestionSubmission implements Serializable {
 
     /**
      * id
@@ -57,9 +57,9 @@ public class QuestionSubmit implements Serializable {
     private String judgeResult;
 
     /**
-     * 判题状态（0 - 待判题、1 - 判题中、2  成功、3 - 失败）
+     * 判题状态（waiting - 待判题、running - 判题中、ac - 通过、fail - 失败）
      */
-    private Integer status;
+    private String status;
 
     /**
      * 创建时间

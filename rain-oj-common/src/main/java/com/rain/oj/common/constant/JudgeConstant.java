@@ -4,8 +4,9 @@ package com.rain.oj.common.constant;
  * 题目常量
  */
 public interface JudgeConstant {
+    String RATE_LIMITER_NAME = "judge:limiter";
     Integer MAX_EXECUTE_RETRY_TIMES = 3;
-    String EXECUTE_RETRY_TIMES = "execute:times:";
+    String EXECUTE_RETRY_TIMES_KEY = "execute:times:";
     String JUDGE_CONTEXT_KEY = "judge:context:";
     Integer JUDGE_CONTEXT_EXPIRE_TIME = 5;
     String EXCHANGE_TYPE = "direct";

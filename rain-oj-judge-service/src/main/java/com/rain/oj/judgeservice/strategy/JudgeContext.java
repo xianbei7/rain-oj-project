@@ -2,7 +2,6 @@ package com.rain.oj.judgeservice.strategy;
 
 import com.rain.oj.model.dto.question.JudgeCase;
 import com.rain.oj.model.entity.Question;
-import com.rain.oj.model.entity.QuestionSubmit;
 import com.rain.oj.model.judge.JudgeInfo;
 import lombok.Data;
 

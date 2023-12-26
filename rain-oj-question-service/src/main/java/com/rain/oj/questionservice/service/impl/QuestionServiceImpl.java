@@ -12,7 +12,6 @@ import com.rain.oj.common.constant.CommonConstant;
 import com.rain.oj.common.constant.QuestionConstant;
 import com.rain.oj.common.exception.BusinessException;
 import com.rain.oj.common.exception.ThrowUtils;
-import com.rain.oj.common.utils.SqlUtils;
 import com.rain.oj.model.dto.question.JudgeCase;
 import com.rain.oj.model.dto.question.JudgeConfig;
 import com.rain.oj.model.dto.question.QuestionQueryRequest;
@@ -22,7 +21,7 @@ import com.rain.oj.model.entity.QuestionFavour;
 import com.rain.oj.model.entity.QuestionThumb;
 import com.rain.oj.model.entity.User;
 import com.rain.oj.model.enums.QuestionDifficultyEnum;
-import com.rain.oj.model.enums.QuestionTypeEnum;
+import com.rain.oj.model.enums.QuestionModeEnum;
 import com.rain.oj.model.vo.DoQuestionVO;
 import com.rain.oj.model.vo.QuestionVO;
 import com.rain.oj.questionservice.mapper.QuestionFavourMapper;
@@ -30,7 +29,6 @@ import com.rain.oj.questionservice.mapper.QuestionMapper;
 import com.rain.oj.questionservice.mapper.QuestionThumbMapper;
 import com.rain.oj.feignclient.service.UserFeignClient;
 import com.rain.oj.questionservice.service.QuestionService;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -295,11 +293,11 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         }
         question.setDifficulty(difficultyEnum.getValue());
         String type = questionSaveRequest.getType();
-        QuestionTypeEnum questionTypeEnum = QuestionTypeEnum.getEnumByType(type);
-        if (questionTypeEnum == null) {
+        QuestionModeEnum questionModeEnum = QuestionModeEnum.getEnumByMode(type);
+        if (questionModeEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "题目类型设置错误");
         }
-        question.setType(questionTypeEnum.getValue());
+        question.setMode(questionModeEnum.getValue());
         List<String> tags = questionSaveRequest.getTags();
         JudgeConfig judgeConfig = questionSaveRequest.getJudgeConfig();
         List<JudgeCase> judgeCase = questionSaveRequest.getJudgeCase();

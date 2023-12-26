@@ -1,4 +1,4 @@
-package com.rain.oj.model.dto.questionsubmit;
+package com.rain.oj.model.dto.questionsubmission;
 
 import com.rain.oj.common.PageRequest;
 import lombok.Data;
@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class UserQuestionSubmitQueryRequest extends PageRequest implements Serializable {
+public class UserQuestionSubmissionQueryRequest extends PageRequest implements Serializable {
 
     private Long userId;
 

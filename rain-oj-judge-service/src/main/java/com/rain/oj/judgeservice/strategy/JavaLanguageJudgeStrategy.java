@@ -4,11 +4,9 @@ import cn.hutool.json.JSONUtil;
 import com.rain.oj.model.dto.question.JudgeCase;
 import com.rain.oj.model.dto.question.JudgeConfig;
 import com.rain.oj.model.entity.Question;
-import com.rain.oj.model.entity.QuestionSubmit;
 import com.rain.oj.model.enums.JudgeResultEnum;
 import com.rain.oj.model.judge.JudgeInfo;
 import com.rain.oj.model.judge.JudgeResult;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -69,14 +67,13 @@ public class JavaLanguageJudgeStrategy implements JudgeStrategy {
                     }
                 }
             }
-            if (correctCaseCount != totalCaseCount) {
-                judgeResult.setType(judgeResultEnum.getType());
-            }
+            judgeResult.setType(judgeResultEnum.getType());
         } else {
             judgeResult.setType(errorType);
             judgeResult.setMessage(judgeContext.getErrorMessage());
         }
         judgeResult.setCorrectRate(correctCaseCount * 100 / totalCaseCount);
+
         return judgeResult;
     }
 }

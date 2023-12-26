@@ -1,8 +1,8 @@
 package com.rain.oj.model.vo;
 
 import cn.hutool.json.JSONUtil;
-import com.rain.oj.model.entity.QuestionSubmit;
-import com.rain.oj.model.enums.QuestionSubmitStatusEnum;
+import com.rain.oj.model.entity.QuestionSubmission;
+import com.rain.oj.model.enums.QuestionSubmissionStatusEnum;
 import com.rain.oj.model.judge.JudgeResult;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -14,7 +14,7 @@ import java.util.Date;
  * 查看题目提交视图
  */
 @Data
-public class ViewQuestionSubmitVO implements Serializable {
+public class ViewQuestionSubmissionVO implements Serializable {
 
     /**
      * id
@@ -46,8 +46,10 @@ public class ViewQuestionSubmitVO implements Serializable {
      */
     private JudgeResult judgeResult;
 
+    private String statusDisplay;
+
     /**
-     * 判题状态（0 - 待判题、1 - 判题中、2  成功、3 - 失败）
+     * 判题状态（waiting - 待判题、running - 判题中、ac - 通过、fail - 失败）
      */
     private String status;
 
@@ -61,19 +63,19 @@ public class ViewQuestionSubmitVO implements Serializable {
     /**
      * 对象转包装类
      *
-     * @param questionSubmit 题目提交
-     * @return {@link ViewQuestionSubmitVO} 题目提交vo
+     * @param questionSubmission 题目提交
+     * @return {@link ViewQuestionSubmissionVO} 题目提交vo
      */
-    public static ViewQuestionSubmitVO objToVo(QuestionSubmit questionSubmit) {
-        if (questionSubmit == null) {
+    public static ViewQuestionSubmissionVO objToVo(QuestionSubmission questionSubmission) {
+        if (questionSubmission == null) {
             return null;
         }
-        ViewQuestionSubmitVO questionSubmitVO = new ViewQuestionSubmitVO();
-        BeanUtils.copyProperties(questionSubmit, questionSubmitVO);
-        String judgeResult = questionSubmit.getJudgeResult();
+        ViewQuestionSubmissionVO questionSubmitVO = new ViewQuestionSubmissionVO();
+        BeanUtils.copyProperties(questionSubmission, questionSubmitVO);
+        String judgeResult = questionSubmission.getJudgeResult();
         questionSubmitVO.setJudgeResult(JSONUtil.toBean(judgeResult, JudgeResult.class));
-        Integer status = questionSubmit.getStatus();
-        questionSubmitVO.setStatus(QuestionSubmitStatusEnum.getEnumByValue(status).getStatus());
+        String status = questionSubmission.getStatus();
+        questionSubmitVO.setStatusDisplay(QuestionSubmissionStatusEnum.getEnumByStatus(status).getDisplay());
         return questionSubmitVO;
     }
 

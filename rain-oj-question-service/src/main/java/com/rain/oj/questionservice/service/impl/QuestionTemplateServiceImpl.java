@@ -8,7 +8,7 @@ import com.rain.oj.common.exception.BusinessException;
 import com.rain.oj.model.entity.Question;
 import com.rain.oj.model.entity.QuestionTemplate;
 import com.rain.oj.model.enums.ProgrammingLanguageEnum;
-import com.rain.oj.model.enums.QuestionTypeEnum;
+import com.rain.oj.model.enums.QuestionModeEnum;
 import com.rain.oj.questionservice.mapper.QuestionTemplateMapper;
 import com.rain.oj.questionservice.service.QuestionService;
 import com.rain.oj.questionservice.service.QuestionTemplateService;
@@ -55,9 +55,9 @@ public class QuestionTemplateServiceImpl extends ServiceImpl<QuestionTemplateMap
         if (languageEnum == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "编程语言错误");
         }
-        Integer type = question.getType();
-        QuestionTypeEnum questionTypeEnum = QuestionTypeEnum.getEnumByValue(type);
-        if (questionTypeEnum.equals(QuestionTypeEnum.ACM)) {
+        Integer mode = question.getMode();
+        QuestionModeEnum questionModeEnum = QuestionModeEnum.getEnumByValue(mode);
+        if (questionModeEnum.equals(QuestionModeEnum.ACM)) {
             String codeTemplate = stringRedisTemplate.opsForValue().get(CodeTemplateConstant.CODE_TEMPLATE_KEY + languageEnum.getLanguage());
             if (StringUtils.isNotBlank(codeTemplate)) {
                 return codeTemplate;
@@ -76,7 +76,7 @@ public class QuestionTemplateServiceImpl extends ServiceImpl<QuestionTemplateMap
                 throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "读取代码模板失败");
             }
             return template.toString();
-        } else if (questionTypeEnum.equals(QuestionTypeEnum.CORE)) {
+        } else if (questionModeEnum.equals(QuestionModeEnum.CORE)) {
             LambdaQueryWrapper<QuestionTemplate> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(QuestionTemplate::getQuestionId, questionId);
             queryWrapper.eq(QuestionTemplate::getLanguage, languageEnum.getLanguage());

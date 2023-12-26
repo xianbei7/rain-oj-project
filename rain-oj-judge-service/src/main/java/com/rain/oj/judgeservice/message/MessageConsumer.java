@@ -46,7 +46,7 @@ public class MessageConsumer {
     public void receiveDeadLetter(String message, Channel channel, @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) {
         ExecuteCodeRequest executeCodeRequest = JSONUtil.toBean(message, ExecuteCodeRequest.class);
         String executeId = executeCodeRequest.getExecuteId();
-        Long times = stringRedisTemplate.opsForValue().increment(JudgeConstant.EXECUTE_RETRY_TIMES + executeId);
+        Long times = stringRedisTemplate.opsForValue().increment(JudgeConstant.EXECUTE_RETRY_TIMES_KEY + executeId);
         if (times < JudgeConstant.MAX_EXECUTE_RETRY_TIMES) {
             codeSandboxTemplate.executeCode(executeCodeRequest);
         } else {

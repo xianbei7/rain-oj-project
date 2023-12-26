@@ -2,7 +2,7 @@ package com.rain.oj.feignclient.service;
 
 import com.rain.oj.common.BaseResponse;
 import com.rain.oj.model.entity.Question;
-import com.rain.oj.model.entity.QuestionSubmit;
+import com.rain.oj.model.entity.QuestionSubmission;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,16 +29,16 @@ public interface QuestionFeignClient {
      * 根据id获取题目提交
      *
      * @param questionSubmitId 题目提交id
-     * @return {@link QuestionSubmit} 题目提交
+     * @return {@link QuestionSubmission} 题目提交
      */
     @GetMapping("/submit/get/id")
-    QuestionSubmit getQuestionSubmitById(@RequestParam("questionSubmitId") Long questionSubmitId);
+    QuestionSubmission getQuestionSubmitById(@RequestParam("questionSubmitId") Long questionSubmitId);
 
     /**
      * 更新题目提交
-     * @param questionSubmit 题目提交
+     * @param questionSubmission 题目提交
      * @return {@link boolean} 是否更新成功
      */
     @PostMapping("/submit/update")
-    BaseResponse<Boolean> updateQuestionSubmitById(@RequestBody QuestionSubmit questionSubmit);
+    BaseResponse<Boolean> updateQuestionSubmitById(@RequestBody QuestionSubmission questionSubmission);
 }
